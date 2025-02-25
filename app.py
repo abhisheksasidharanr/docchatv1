@@ -20,7 +20,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 app = FastAPI()
 
-origins = ["http://localhost:3000"]  # Allowed origins (Add more if needed)
+origins = ["https://docchatv1.onrender.com"]  # Allowed origins (Add more if needed)
 
 app.add_middleware(
     CORSMiddleware,
