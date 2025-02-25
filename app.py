@@ -17,8 +17,7 @@ from langchain_core.messages import SystemMessage
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
-
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 # API Keys
 PINE_CONE_KEY = os.getenv("PINE_CONE_KEY")
@@ -138,4 +137,4 @@ def chat():
     return jsonify({"question": user_question, "answer": response})
 
 if __name__ == "__main__":    
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=10000, debug=True)
