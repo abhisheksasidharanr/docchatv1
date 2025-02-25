@@ -146,6 +146,5 @@ async def chat(user_question: str = Form(...), namespace: str = Form(...)):
     response = conversation.predict(human_input=user_question)
     return JSONResponse(content={"question": user_question, "answer": response})
 
-if __name__ == "__main__":
-    if __name__ == "__main__":
+if __name__ == "__main__":    
     app.run(debug=True)
