@@ -9,3 +9,4 @@ fastapi
 python-multipart
 gunicorn
 python-docx
+uvicorn
