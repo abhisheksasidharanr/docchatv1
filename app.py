@@ -148,4 +148,5 @@ async def chat(user_question: str = Form(...), namespace: str = Form(...)):
     return JSONResponse(content={"question": user_question, "answer": response})
 
 if __name__ == "__main__":    
-    app.run(debug=True)
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
