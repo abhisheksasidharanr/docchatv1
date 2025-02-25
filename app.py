@@ -17,7 +17,8 @@ from langchain_core.messages import SystemMessage
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS
+CORS(app, supports_credentials=True)
+
 
 # API Keys
 PINE_CONE_KEY = os.getenv("PINE_CONE_KEY")
