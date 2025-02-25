@@ -5,7 +5,8 @@ PyPDF2
 sentence-transformers
 langchain-groq
 langchain-core
-fastapi
+flask
+flask_cors
 python-multipart
 gunicorn
 python-docx
