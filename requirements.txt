@@ -1,0 +1,11 @@
+pinecone
+langchain-community
+langchain
+PyPDF2
+sentence-transformers
+langchain-groq
+langchain-core
+fastapi
+python-multipart
+uvicorn
+python-docx
