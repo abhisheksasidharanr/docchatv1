@@ -7,5 +7,5 @@ langchain-groq
 langchain-core
 fastapi
 python-multipart
-uvicorn
+gunicorn
 python-docx
