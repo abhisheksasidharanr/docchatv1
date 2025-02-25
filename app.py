@@ -17,6 +17,7 @@ from langchain_core.prompts import ChatPromptTemplate, HumanMessagePromptTemplat
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
 from langchain_core.messages import SystemMessage
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+import gunicorn
 
 app = FastAPI()
 
