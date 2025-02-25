@@ -1,7 +1,5 @@
-
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 from io import BytesIO
 from PyPDF2 import PdfReader
 from docx import Document  # Import for handling DOCX files
@@ -17,19 +15,9 @@ from langchain_core.prompts import ChatPromptTemplate, HumanMessagePromptTemplat
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
 from langchain_core.messages import SystemMessage
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-import gunicorn
 
-app = FastAPI()
-
-origins = ["https://docchatv1.onrender.com"]  # Allowed origins (Add more if needed)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app = Flask(__name__)
+CORS(app)  # Enable CORS
 
 # API Keys
 PINE_CONE_KEY = os.getenv("PINE_CONE_KEY")
@@ -75,28 +63,26 @@ def extract_text_from_docx(docx_file: bytes) -> str:
     doc = Document(BytesIO(docx_file))
     return "\n".join([para.text for para in doc.paragraphs if para.text.strip()])
 
-@app.post("/upload")
-async def upload_files(files: list[UploadFile] = File(...)):
+@app.route("/upload", methods=["POST"])
+def upload_files():
+    files = request.files.getlist("files")
     text = ""
     
     for file in files:
-        file_bytes = await file.read()
+        file_bytes = file.read()
         if file.filename.endswith(".pdf"):
-            
             pdf_reader = PdfReader(BytesIO(file_bytes))
             for page in pdf_reader.pages:
-                
                 page_text = page.extract_text()
                 if page_text:
                     text += page_text + "\n"
         elif file.filename.endswith(".docx"):
-            
             text += extract_text_from_docx(file_bytes) + "\n"
         else:
-            raise HTTPException(status_code=400, detail=f"Unsupported file format: {file.filename}")
+            return jsonify({"error": f"Unsupported file format: {file.filename}"}), 400
 
     if not text.strip():
-        raise HTTPException(status_code=400, detail="No text extracted from files.")
+        return jsonify({"error": "No text extracted from files."}), 400
 
     chunks = get_text_chunks(text)
     vectors = embedTheText(chunks)
@@ -107,10 +93,13 @@ async def upload_files(files: list[UploadFile] = File(...)):
         k=5, memory_key="chat_history", return_messages=True
     )
 
-    return JSONResponse(content={"namespace": namespace, "message": "Files processed successfully"})
+    return jsonify({"namespace": namespace, "message": "Files processed successfully"})
 
-@app.post("/chat")
-async def chat(user_question: str = Form(...), namespace: str = Form(...)):
+@app.route("/chat", methods=["POST"])
+def chat():
+    user_question = request.form.get("user_question")
+    namespace = request.form.get("namespace")
+
     if namespace not in memories:
         memories[namespace] = ConversationBufferWindowMemory(
             k=5, memory_key="chat_history", return_messages=True
@@ -145,8 +134,7 @@ async def chat(user_question: str = Form(...), namespace: str = Form(...)):
     )
 
     response = conversation.predict(human_input=user_question)
-    return JSONResponse(content={"question": user_question, "answer": response})
+    return jsonify({"question": user_question, "answer": response})
 
 if __name__ == "__main__":    
-    import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    app.run(debug=True)
